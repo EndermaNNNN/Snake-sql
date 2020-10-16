@@ -1,0 +1,8 @@
+FROM ubuntu:18.04
+USER root
+
+ADD properties/poc.sh /poc.sh
+RUN apt update	\
+    && apt install curl -y
+
+CMD ["bash", "-c", "echo 1 && bash poc.sh"]

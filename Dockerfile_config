@@ -1,0 +1,27 @@
+FROM ubuntu:18.04
+
+COPY properties/geckodriver-v0.26.0-linux64.tar.gz /
+RUN apt update \
+    && apt install python2.7 python-pip firefox -y \
+    && pip install selenium==3.141.0 \
+    && tar -xzf geckodriver-v0.26.0-linux64.tar.gz \
+    && mv geckodriver /usr/local/bin
+
+RUN useradd --shell /bin/bash user
+RUN chmod 777 -R /tmp \
+    && chmod 777 -R /usr
+
+ADD properties/install.py /tmp/
+ADD properties/check_config.sh /tmp/
+ADD properties/config.sh /
+ADD properties/init.sql /
+ADD properties/snake.sql /
+
+
+RUN apt install curl -y
+RUN apt install mysql-client -y
+#RUN su user \
+#    && python /tmp/install.py \
+#    && bash /tmp/check_config.sh
+
+CMD ["bash", "-c", "echo 1 && bash /config.sh"]

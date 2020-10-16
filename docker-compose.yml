@@ -1,0 +1,49 @@
+version: '3'
+services:
+    web:
+        image: endermann/snake-sql-web:latest
+        build:
+            context: .
+            dockerfile: Dockerfile_web
+        container_name: snake-sql-web-app
+        ports:
+            - "8151:80"
+            - "10034:22"
+        restart: always
+        tty: true
+    db:
+        image: mysql:8.0
+        command: --default-authentication-plugin=mysql_native_password
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: snake
+    config:
+        image: shawnsky/puppeteer:5.2.0
+        container_name: snake-sql-config-app
+        volumes:
+            - ./properties/bot.js:/app/bot.js
+            - ./properties/entrypoint.sh:/app/entrypoint.sh
+        entrypoint: /app/entrypoint.sh
+        depends_on:
+            - web
+    poc:
+        image: endermann/snake-sql-poc:latest
+        build:
+            context: .
+            dockerfile: Dockerfile_poc
+        container_name: snake-sql-poc-app
+        restart: always
+        tty: true
+        depends_on:
+            - config
+    ids:
+        image: endermann/snake-sql-ids:latest
+        build:
+            context: .
+            dockerfile: Dockerfile_ids
+        network_mode: service:web
+        container_name: snake-sql-ids-app
+        depends_on:
+            - web
+        restart: always
